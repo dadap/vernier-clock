@@ -17,6 +17,11 @@ body, canvas {
     Vernier clock requires support for HTML canvas and Javascript
 </canvas>
 <script>
+    function get_center(c2d)
+    {
+        return { 'x' : c2d.canvas.width / 2, 'y' : c2d.canvas.height / 2 };
+    }
+
     function dial(c2d, steps, angle, grade_1, grade_2, base, extend, len_0, len_1, len_2, len_3)
     {
         const stroke_thickest = 3.5;
@@ -24,8 +29,8 @@ body, canvas {
         const stroke_medium = 1.75;
         const stroke_thin = 1;
 
-        const center_x = c2d.canvas.width / 2;
-        const center_y = c2d.canvas.height / 2;
+        const center_x = get_center(c2d).x;
+        const center_y = get_center(c2d).y;
 
         for (let i = 0; i < steps; i++) {
             let len = base;
@@ -56,12 +61,24 @@ body, canvas {
         }
     }
 
+    function ring(c2d, r, stroke, color)
+    {
+        const center_x = get_center(c2d).x;
+        const center_y = get_center(c2d).y;
+
+        c2d.beginPath();
+        c2d.arc(center_x, center_y, r, 0, Math.PI * 2);
+        c2d.strokeStyle = color;
+        c2d.lineWidth = stroke;
+        c2d.stroke();
+    }
+
     function paint(when)
     {
         const c = document.getElementById("c");
         const c2d = c.getContext("2d");
-        const center_x = c.width / 2;
-        const center_y = c.height / 2;
+        const center_x = get_center(c2d).x;
+        const center_y = get_center(c2d).y;
         const r = Math.min(c.width, c.height) * 3 / 8;
         const time_angle = (3600 * when.getHours() +
                            60 * when.getMinutes() +
@@ -70,12 +87,8 @@ body, canvas {
         c2d.clearRect(0, 0, c.width, c.height);
         c2d.resetTransform();
 
-        c2d.strokeStyle = "#333";
-
-        c2d.beginPath();
-        c2d.arc(center_x, center_y, r, 0, Math.PI * 2);
-        c2d.lineWidth = r  * 11 / 25;
-        c2d.stroke();
+        ring(c2d, r * 9 / 8, r / 4, "#222");
+        ring(c2d, r * 7 / 8, r / 4, "#282828");
 
         c2d.fillStyle = "#ddd";
         c2d.strokeStyle = "#ddd";
