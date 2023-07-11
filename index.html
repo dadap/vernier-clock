@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+body, canvas {
+    background: #111;
+    margin : 0;
+    padding : 0;
+}
+</style>
+<title>Current Time</title>
+</head>
+
+<body>
+<canvas id="c">
+    Vernier clock requires support for HTML canvas and Javascript
+</canvas>
+<script>
+    function dial(c2d, steps, angle, grade_1, grade_2, base, extend, len_0, len_1, len_2, len_3)
+    {
+        const stroke_thickest = 3.5;
+        const stroke_thick = 2.5;
+        const stroke_medium = 1.75;
+        const stroke_thin = 1;
+
+        const center_x = c2d.canvas.width / 2;
+        const center_y = c2d.canvas.height / 2;
+
+        for (let i = 0; i < steps; i++) {
+            let len = base;
+            let base_offset = 0;
+
+            if (i == 0) {
+                len /= len_0;
+                c2d.lineWidth = stroke_thickest;
+                base_offset = base * extend;
+            } else if (i % grade_1 == 0) {
+                len /= len_1;
+                c2d.lineWidth = stroke_thick;
+            } else if (i % grade_2 == 0) {
+                len /= len_2;
+                c2d.lineWidth = stroke_medium;
+            } else {
+                len /= len_3;
+                c2d.lineWidth = stroke_thin;
+            }
+
+            c2d.beginPath();
+            c2d.translate(center_x, center_y);
+            c2d.moveTo(0, - base + base_offset);
+            c2d.lineTo(0, - base + len);
+            c2d.rotate(angle);
+            c2d.translate(-center_x, -center_y);
+            c2d.stroke();
+        }
+    }
+
+    function paint(when)
+    {
+        const c = document.getElementById("c");
+        const c2d = c.getContext("2d");
+        const center_x = c.width / 2;
+        const center_y = c.height / 2;
+        const r = Math.min(c.width, c.height) * 3 / 8;
+        const time_angle = (3600 * when.getHours() +
+                           60 * when.getMinutes() +
+                           when.getSeconds()) * Math.PI / 43200;
+
+        c2d.clearRect(0, 0, c.width, c.height);
+        c2d.resetTransform();
+
+        c2d.strokeStyle = "#333";
+
+        c2d.beginPath();
+        c2d.arc(center_x, center_y, r, 0, Math.PI * 2);
+        c2d.lineWidth = r  * 11 / 25;
+        c2d.stroke();
+
+        c2d.fillStyle = "#ddd";
+        c2d.strokeStyle = "#ddd";
+
+        dial(c2d, 48, Math.PI / 24, 6, 2, r, 0, -9/2, -6, -8, -15);
+
+        c2d.resetTransform();
+        c2d.translate(center_x, center_y);
+        c2d.rotate(time_angle);
+        c2d.translate(-center_x, -center_y);
+
+        c2d.beginPath();
+        c2d.moveTo(center_x, center_y -r * 63/64);
+        c2d.lineTo(center_x - r/20, center_y -r * 5/6);
+        c2d.lineTo(center_x + r/20, center_y -r * 5/6);
+        c2d.closePath();
+        c2d.fill();
+
+        dial(c2d, 30, Math.PI * 29 / 720, 10, 5, r, -1/64, 8, 6, 9, 15);
+    }
+
+    function paint_now() { paint(new Date()); }
+
+    document.getElementById("c").width = document.documentElement.clientWidth;
+    document.getElementById("c").height = document.documentElement.clientHeight;
+
+    paint_now();
+    window.setInterval(paint_now, 10000);
+</script>
+
+</body>
+</html>
