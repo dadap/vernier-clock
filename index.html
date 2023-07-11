@@ -12,7 +12,7 @@ body, canvas {
 <title>Current Time</title>
 </head>
 
-<body>
+<body onResize="paint_now()">
 <canvas id="c">
     Vernier clock requires support for HTML canvas and Javascript
 </canvas>
@@ -110,10 +110,15 @@ body, canvas {
         dial(c2d, 30, Math.PI * 29 / 720, 10, 5, r, -1/64, 8, 6, 9, 15);
     }
 
-    function paint_now() { paint(new Date()); }
+    function paint_now() {
+        const c = document.getElementById("c");
+        const root = document.documentElement;
 
-    document.getElementById("c").width = document.documentElement.clientWidth;
-    document.getElementById("c").height = document.documentElement.clientHeight;
+        c.width = root.clientWidth;
+        c.height = root.clientHeight;
+
+        paint(new Date());
+    }
 
     paint_now();
     window.setInterval(paint_now, 10000);
