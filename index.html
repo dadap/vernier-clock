@@ -41,7 +41,7 @@ body, canvas {
                     'inner' : {
                         'steps' : 90,
                         'divisions' : [
-                            { 'length' : 8, 'extend' : -1/64 },
+                            { 'length' : 8, 'extend' : -1/50 },
                             { 'length' : 6, 'grade' : 30 },
                             { 'length' : 9, 'grade' : 6 },
                             { 'length' : 15}
@@ -64,7 +64,7 @@ body, canvas {
                     'inner' : {
                         'steps' : 30,
                         'divisions' : [
-                            { 'length' : 8, 'extend' : -1/64 },
+                            { 'length' : 8, 'extend' : -1/50 },
                             { 'length' : 6, 'grade' : 10 },
                             { 'length' : 9, 'grade' : 5 },
                             { 'length' : 15}
@@ -87,7 +87,7 @@ body, canvas {
                     'inner' : {
                         'steps' : 20,
                         'divisions' : [
-                            { 'length' : 8, 'extend' : -1/32 },
+                            { 'length' : 8, 'extend' : -1/50 },
                             { 'length' : 6, 'grade' : 10 },
                             { 'length' : 9, 'grade' : 5 },
                             { 'length' : 15 }
@@ -198,8 +198,8 @@ body, canvas {
             c2d.closePath();
             c2d.fill();
 
-            this.#dial(marks.inner.steps,
-                       (marks.inner.steps - 1) / marks.outer.steps,
+            this.#dial(marks.inner.steps + 1,
+                       marks.inner.steps / marks.outer.steps,
                        marks.inner.divisions);
         }
     }
