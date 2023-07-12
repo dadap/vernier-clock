@@ -18,10 +18,87 @@ body, canvas {
 </canvas>
 <script>
     class Clock {
+        #center_x;
+        #center_y;
+        #radius;
+        #scale;
         #c2d;
+
+        static #scales = [
+            {
+                'min' : 240,
+                'marks' : {
+                    'outer' : {
+                        'steps' : 96,
+                        'divisions' : [
+                            { 'length' : -9/2 },
+                            { 'length' : -6, 'grade' : 12 },
+                            { 'length' : -8, 'grade' : 4 },
+                            { 'length' : -15 }
+                        ]
+                    },
+                    'inner' : {
+                        'steps' : 90,
+                        'divisions' : [
+                            { 'length' : 8, 'extend' : -1/64 },
+                            { 'length' : 6, 'grade' : 30 },
+                            { 'length' : 9, 'grade' : 6 },
+                            { 'length' : 15}
+                        ]
+                    }
+                }
+            },
+            {
+                'min' : 120,
+                'marks' : {
+                    'outer' : {
+                        'steps' : 48,
+                        'divisions' : [
+                            { 'length' : -9/2 },
+                            { 'length' : -6, 'grade' : 6 },
+                            { 'length' : -8, 'grade' : 2 },
+                            { 'length' : -15 }
+                        ]
+                    },
+                    'inner' : {
+                        'steps' : 30,
+                        'divisions' : [
+                            { 'length' : 8, 'extend' : -1/64 },
+                            { 'length' : 6, 'grade' : 10 },
+                            { 'length' : 9, 'grade' : 5 },
+                            { 'length' : 15}
+                        ]
+                    }
+                }
+            },
+            {
+                'min' : 0,
+                'marks' : {
+                    'outer' : {
+                        'steps' : 24,
+                        'divisions' : [
+                            { 'length' : -9/2 },
+                            { 'length' : -6, 'grade' : 6 },
+                            { 'length' : -8, 'grade' : 3 },
+                            { 'length' : -15 }
+                        ]
+                    },
+                    'inner' : {
+                        'steps' : 20,
+                        'divisions' : [
+                            { 'length' : 8, 'extend' : -1/32 },
+                            { 'length' : 6, 'grade' : 10 },
+                            { 'length' : 9, 'grade' : 5 },
+                            { 'length' : 15 }
+                        ]
+                    }
+                }
+            }
+        ];
 
         constructor(canvas) {
             this.#c2d = canvas.getContext("2d");
+            this.#resize();
         }
 
         #resize() {
@@ -30,24 +107,25 @@ body, canvas {
 
             canvas.width = root.clientWidth;
             canvas.height = root.clientHeight;
-        }
 
-        #center() {
-            let canvas = this.#c2d.canvas;
-            return { 'x' : canvas.width / 2, 'y' : canvas.height / 2 };
-        }
+            this.#center_x = canvas.width / 2;
+            this.#center_y = canvas.height / 2;
 
-        #radius() {
-            const canvas = this.#c2d.canvas;
+            this.#radius = Math.min(canvas.width, canvas.height) * 3/8;
 
-            return Math.min(canvas.width, canvas.height) * 3/8;
+            for (const s of Clock.#scales) {
+                if (this.#radius >= s.min) {
+                    this.#scale = s;
+                    break;
+                }
+            }
         }
 
         #dial(steps, ratio, divisions) {
             const angle = ratio * 2 * Math.PI / steps;
-            const cx = this.#center().x;
-            const cy = this.#center().y;
-            const r = this.#radius();
+            const cx = this.#center_x;
+            const cy = this.#center_y;
+            const r = this.#radius;
             const c2d = this.#c2d;
 
             for (let i = 0; i < steps; i++) {
@@ -75,10 +153,10 @@ body, canvas {
 
         #ring(offset, color) {
             const c2d = this.#c2d;
-            const r = this.#radius();
+            const r = this.#radius;
 
             c2d.beginPath();
-            c2d.arc(this.#center().x, this.#center().y, r + r * offset,
+            c2d.arc(this.#center_x, this.#center_y, r + r * offset,
                     0, Math.PI * 2);
             c2d.lineWidth = Math.abs(offset) * r * 2;
             c2d.strokeStyle = color;
@@ -86,29 +164,15 @@ body, canvas {
         }
 
         paint(when) {
-            const divisions_outer = [
-                { 'length' : -9/2 },
-                { 'length' : -6, 'grade' : 6 },
-                { 'length' : -8, 'grade' : 2 },
-                { 'length' : -15}
-            ];
-            const divisions_inner = [
-                { 'length' : 8, 'extend' : -1/64 },
-                { 'length' : 6, 'grade' : 10 },
-                { 'length' : 9, 'grade' : 5 },
-                { 'length' : 15}
-            ];
             const time_angle = (3600 * when.getHours() + 60 * when.getMinutes()
                                 + when.getSeconds()) * Math.PI / 43200;
             const c2d = this.#c2d;
-            let cx;
-            let cy;
-            let r;
 
             this.#resize();
-            cx = this.#center().x;
-            cy = this.#center().y;
-            r = this.#radius();
+            const marks = this.#scale.marks;
+            const cx = this.#center_x;
+            const cy = this.#center_y;
+            const r = this.#radius;
 
             c2d.clearRect(0, 0, c2d.canvas.width, c2d.canvas.height);
             c2d.resetTransform();
@@ -119,7 +183,7 @@ body, canvas {
             c2d.fillStyle = "#ddd";
             c2d.strokeStyle = "#ddd";
 
-            this.#dial(48, 1, divisions_outer);
+            this.#dial(marks.outer.steps, 1, marks.outer.divisions);
 
             c2d.resetTransform();
             c2d.translate(cx, cy);
@@ -133,7 +197,9 @@ body, canvas {
             c2d.closePath();
             c2d.fill();
 
-            this.#dial(30, 29 / 48, divisions_inner);
+            this.#dial(marks.inner.steps,
+                       (marks.inner.steps - 1) / marks.outer.steps,
+                       marks.inner.divisions);
         }
     }
 
