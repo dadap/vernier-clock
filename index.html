@@ -122,14 +122,15 @@ body, canvas {
             }
         }
 
-        #dial(steps, ratio, divisions) {
+        #dial(steps, fullsteps, divisions) {
+            const ratio = steps == fullsteps ? 1 : ((steps - 1) / fullsteps);
             const angle = ratio * 2 * Math.PI / steps;
             const cx = this.#center_x;
             const cy = this.#center_y;
             const r = this.#radius;
             const c2d = this.#c2d;
 
-            for (let i = 0; i < steps; i++) {
+            for (let i = 0; i <= steps; i++) {
                 let offset = 0;
                 let len;
 
@@ -184,7 +185,9 @@ body, canvas {
             c2d.fillStyle = "#ddd";
             c2d.strokeStyle = "#ddd";
 
-            this.#dial(marks.outer.steps, 1, marks.outer.divisions);
+            this.#dial(marks.outer.steps,
+                       marks.outer.steps,
+                       marks.outer.divisions);
 
             c2d.resetTransform();
             c2d.translate(cx, cy);
@@ -198,8 +201,8 @@ body, canvas {
             c2d.closePath();
             c2d.fill();
 
-            this.#dial(marks.inner.steps + 1,
-                       marks.inner.steps / marks.outer.steps,
+            this.#dial(marks.inner.steps,
+                       marks.outer.steps,
                        marks.inner.divisions);
         }
     }
